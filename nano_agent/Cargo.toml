@@ -5,9 +5,8 @@ edition.workspace = true
 description = "Lightweight Rust framework for building AI agents."
 license = "MIT"
 readme = "../README.md"
-repository = "https://github.com/raikitamura/agent-rs"
+repository = "https://github.com/tamaroning/nano-agent"
 keywords = ["ai", "agent", "llm", "genai"]
-categories = ["api-bindings", "web-programming"]
 rust-version = "1.85"
 include = ["Cargo.toml", "LICENSE", "src/**/*", "../README.md"]
 
