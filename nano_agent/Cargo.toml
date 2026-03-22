@@ -1,12 +1,12 @@
 [package]
 name = "nano-agent"
-version = "0.1.0"
-edition = "2024"
-description = "Lightweight Rust framework for building structured LLM agents with JSON-schema I/O, tools, and context providers (Gemini via genai)."
+version.workspace = true
+edition.workspace = true
+description = "Lightweight Rust framework for building AI agents."
 license = "MIT"
 readme = "../README.md"
 repository = "https://github.com/raikitamura/agent-rs"
-keywords = ["ai", "agent", "llm", "gemini", "genai"]
+keywords = ["ai", "agent", "llm", "genai"]
 categories = ["api-bindings", "web-programming"]
 rust-version = "1.85"
 include = ["Cargo.toml", "LICENSE", "src/**/*", "../README.md"]
