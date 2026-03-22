@@ -1,0 +1,12 @@
+[package]
+name = "orchestrator"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+nano-agent = { workspace = true }
+schemars = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }
+tokio = { workspace = true }
+tracing-subscriber = { workspace = true }
