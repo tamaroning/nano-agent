@@ -82,6 +82,24 @@ serde_json = { version = "1" }
 tokio = { version = "1", features = ["full"] }
 ```
 
+## Tools
+
+Built-in tools are optional and enabled via Cargo features:
+
+| Tool | Feature flag | What it does |
+| --- | --- | --- |
+| `Calculator` | `calculator` | Evaluates math expressions (e.g. arithmetic, trig, logs, roots). |
+| `SearxngSearch` | `searxng` | Runs web search via a SearXNG instance (`SEARXNG_URL`). |
+| `DuckDuckGoSearch` | `duckduckgo_search` | Runs web search via DuckDuckGo. |
+| `WebpageScraper` | `webpage_scraper` | Fetches a webpage and returns readable Markdown + metadata. |
+
+Example:
+
+```toml
+nano-agent = { version = "0.1", features = ["calculator", "duckduckgo_search"] }
+```
+
+
 ## Status
 
 - [x] Structured I/O types

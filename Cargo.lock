@@ -1206,6 +1206,7 @@ dependencies = [
  "htmd",
  "meval",
  "readability",
+ "regex",
  "reqwest 0.12.28",
  "schemars 1.2.1",
  "scraper",

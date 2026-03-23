@@ -8,7 +8,8 @@ use nano_agent::{
     AgentConfig, AgentError, BasicNanoAgent, NanoAgent,
     context::{ChatHistory, ContextProvider, SystemPromptGenerator},
     tools::{
-        SearxngSearch, SearxngSearchInput, SearxngSearchOutput, WebpageScraper, WebpageScraperInput,
+        DuckDuckGoSearch, DuckDuckGoSearchInput, SearxngSearch, SearxngSearchInput, WebpageScraper,
+        WebpageScraperInput,
     },
 };
 use schemars::JsonSchema;
@@ -34,6 +35,17 @@ const MAX_MARKDOWN_CHARS_PER_PAGE: usize = 12_000;
 struct ContentItem {
     url: String,
     content: String,
+}
+
+#[derive(Clone)]
+struct SearchResultItem {
+    url: String,
+    title: String,
+}
+
+enum SearchBackend {
+    Searxng(SearxngSearch),
+    DuckDuckGo(DuckDuckGoSearch),
 }
 
 struct CurrentDateContextProvider;
@@ -138,13 +150,10 @@ fn truncate_chars(s: &str, max: usize) -> String {
     format!("{}… [truncated]", s.chars().take(max).collect::<String>())
 }
 
-fn pick_top_results(
-    output: SearxngSearchOutput,
-    limit: usize,
-) -> Vec<nano_agent::tools::SearxngResultItem> {
+fn pick_top_results(results: Vec<SearchResultItem>, limit: usize) -> Vec<SearchResultItem> {
     let mut seen = std::collections::HashSet::new();
     let mut out = Vec::new();
-    for r in output.results {
+    for r in results {
         if seen.insert(r.url.clone()) {
             out.push(r);
         }
@@ -241,7 +250,7 @@ async fn perform_search_and_update_context(
     user_message: &str,
     scraped: &Arc<Mutex<Vec<ContentItem>>>,
     query_agent: &mut BasicNanoAgent<QueryAgentInput, QueryAgentOutput>,
-    searx: &SearxngSearch,
+    search_backend: &SearchBackend,
     scraper: &WebpageScraper,
 ) -> Result<(), AgentError> {
     println!("\n🤔 Analyzing your question to generate relevant search queries...");
@@ -257,15 +266,43 @@ async fn perform_search_and_update_context(
         println!("  {}. {}", i + 1, q);
     }
 
-    println!("\n🌐 Searching the web via SearXNG...");
-    let search_input = SearxngSearchInput {
-        queries: query_out.queries.clone(),
-        category: None,
+    let search_results = match search_backend {
+        SearchBackend::Searxng(searx) => {
+            println!("\n🌐 Searching the web via SearXNG...");
+            let search_input = SearxngSearchInput {
+                queries: query_out.queries.clone(),
+                category: None,
+            };
+            let out = searx
+                .run(search_input)
+                .await
+                .map_err(|e| AgentError::RequestFailed(format!("SearXNG: {e}")))?;
+            out.results
+                .into_iter()
+                .map(|r| SearchResultItem {
+                    url: r.url,
+                    title: r.title,
+                })
+                .collect::<Vec<_>>()
+        }
+        SearchBackend::DuckDuckGo(ddg) => {
+            println!("\n🌐 Searching the web via DuckDuckGo...");
+            let search_input = DuckDuckGoSearchInput {
+                queries: query_out.queries.clone(),
+            };
+            let out = ddg
+                .run(search_input)
+                .await
+                .map_err(|e| AgentError::RequestFailed(format!("DuckDuckGo: {e}")))?;
+            out.results
+                .into_iter()
+                .map(|r| SearchResultItem {
+                    url: r.url,
+                    title: r.title,
+                })
+                .collect::<Vec<_>>()
+        }
     };
-    let search_results = searx
-        .run(search_input)
-        .await
-        .map_err(|e| AgentError::RequestFailed(format!("SearXNG: {e}")))?;
 
     let top = pick_top_results(search_results, MAX_SCRAPE_URLS);
     println!("\n📑 Found relevant web pages:");
@@ -374,9 +411,20 @@ async fn main() {
         }
     });
 
-    let searx_url =
-        std::env::var("SEARXNG_URL").unwrap_or_else(|_| "http://127.0.0.1:8080".to_string());
-    let searx = SearxngSearch::new(&searx_url).expect("SearXNG client");
+    let search_backend = match std::env::var("SEARXNG_URL")
+        .ok()
+        .map(|v| v.trim().to_string())
+        .filter(|v| !v.is_empty())
+    {
+        Some(searx_url) => {
+            println!("🔧 Search backend: SearXNG ({searx_url})");
+            SearchBackend::Searxng(SearxngSearch::new(&searx_url).expect("SearXNG client"))
+        }
+        None => {
+            println!("🔧 Search backend: DuckDuckGo (SEARXNG_URL is not set)");
+            SearchBackend::DuckDuckGo(DuckDuckGoSearch::new().expect("DuckDuckGo client"))
+        }
+    };
     let scraper = WebpageScraper::new().expect("HTTP client for scraper");
 
     let scraped_store: Arc<Mutex<Vec<ContentItem>>> = Arc::new(Mutex::new(Vec::new()));
@@ -456,7 +504,7 @@ async fn main() {
                 &user_message,
                 &scraped_store,
                 &mut query_agent,
-                &searx,
+                &search_backend,
                 &scraper,
             )
             .await

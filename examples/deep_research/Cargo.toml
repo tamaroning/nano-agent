@@ -5,7 +5,7 @@ edition.workspace = true
 
 [dependencies]
 chrono = { version = "0.4", default-features = false, features = ["clock", "std"] }
-nano-agent = { workspace = true, features = ["searxng", "webpage_scraper"] }
+nano-agent = { workspace = true, features = ["searxng", "duckduckgo_search", "webpage_scraper"] }
 schemars = { workspace = true }
 serde = { workspace = true }
 serde_json = { workspace = true }

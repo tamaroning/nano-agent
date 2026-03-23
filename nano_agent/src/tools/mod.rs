@@ -12,6 +12,15 @@ pub use searxng_search::{
     SearxngResultItem, SearxngSearch, SearxngSearchError, SearxngSearchInput, SearxngSearchOutput,
 };
 
+#[cfg(feature = "duckduckgo_search")]
+mod duckduckgo_search;
+
+#[cfg(feature = "duckduckgo_search")]
+pub use duckduckgo_search::{
+    DuckDuckGoResultItem, DuckDuckGoSearch, DuckDuckGoSearchError, DuckDuckGoSearchInput,
+    DuckDuckGoSearchOutput,
+};
+
 #[cfg(feature = "webpage_scraper")]
 mod webpage_scraper;
 

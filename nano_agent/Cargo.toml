@@ -17,6 +17,7 @@ all-features = true
 default = []
 searxng = ["dep:reqwest"]
 calculator = ["dep:meval"]
+duckduckgo_search = ["dep:reqwest", "dep:regex"]
 webpage_scraper = [
     "dep:reqwest",
     "dep:readability",
@@ -32,6 +33,7 @@ htmd = { version = "0.5", optional = true }
 meval = { version = "0.2", optional = true }
 readability = { version = "0.3", default-features = false, optional = true }
 reqwest = { version = "0.12", default-features = false, optional = true, features = ["json", "rustls-tls"] }
+regex = { version = "1", optional = true }
 scraper = { version = "0.22", optional = true }
 schemars = { workspace = true }
 serde = { workspace = true }
