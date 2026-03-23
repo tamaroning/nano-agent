@@ -15,7 +15,7 @@ use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use url::Url;
 
-/// Default browser-like User-Agent (same spirit as the Python tool).
+/// Default browser-like User-Agent.
 const DEFAULT_USER_AGENT: &str = concat!(
     "Mozilla/5.0 (Windows NT 10.0; Win64; x64) ",
     "AppleWebKit/537.36 (KHTML, like Gecko) ",
@@ -65,7 +65,6 @@ pub struct WebpageScraperOutput {
     pub error: Option<String>,
 }
 
-/// Configuration mirroring the Python `WebpageScraperToolConfig`.
 #[derive(Debug, Clone)]
 pub struct WebpageScraperConfig {
     pub user_agent: String,
@@ -139,7 +138,7 @@ impl WebpageScraper {
             .with_schema(schema)
     }
 
-    /// Runs the full pipeline; on failure returns `error` and empty content (same contract as the Python tool).
+    /// Run the webpage scraper.
     pub async fn run(&self, input: WebpageScraperInput) -> WebpageScraperOutput {
         let domain = domain_from_url(&input.url);
         match self.run_inner(input).await {

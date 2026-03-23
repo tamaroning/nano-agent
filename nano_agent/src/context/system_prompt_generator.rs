@@ -43,7 +43,7 @@ impl SystemPromptGenerator {
         &mut self.context_provider
     }
 
-    /// Generate the system prompt (same structure as Python `generate_prompt`).
+    /// Generate the system prompt.
     pub fn generate(&self) -> String {
         let mut parts: Vec<String> = Vec::new();
 

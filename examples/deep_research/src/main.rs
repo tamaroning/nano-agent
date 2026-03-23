@@ -1,4 +1,4 @@
-//! Deep Research CLI: mirrors `src/py/main.py` using `nano-agent` (structured agents + SearXNG + scraper).
+//! Deep Research CLI.
 
 use std::io::{self, Write};
 use std::sync::{Arc, Mutex};
@@ -36,7 +36,6 @@ struct ContentItem {
     content: String,
 }
 
-/// Matches Python `CurrentDateContextProvider`.
 struct CurrentDateContextProvider;
 
 impl ContextProvider for CurrentDateContextProvider {
@@ -50,7 +49,6 @@ impl ContextProvider for CurrentDateContextProvider {
     }
 }
 
-/// Matches Python `ScrapedContentContextProvider` (shared across agents via [`Arc`]).
 struct ScrapedContentContextProvider {
     items: Arc<Mutex<Vec<ContentItem>>>,
 }
